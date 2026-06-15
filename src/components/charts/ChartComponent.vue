@@ -41,6 +41,7 @@ const emit = defineEmits(['drill-down', 'data-click'])
 
 const chartRef = ref(null)
 let chartInstance = null
+let resizeObserver = null
 const dataStore = useDataStore()
 const canvasStore = useCanvasStore()
 
@@ -298,10 +299,24 @@ const handleResize = () => {
 onMounted(() => {
   initChart()
   window.addEventListener('resize', handleResize)
+
+  // 监听容器尺寸变化（拖拽调整大小时触发）
+  if (chartRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      if (chartInstance) {
+        chartInstance.resize()
+      }
+    })
+    resizeObserver.observe(chartRef.value)
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
   if (chartInstance) {
     chartInstance.dispose()
     chartInstance = null
