@@ -34,6 +34,9 @@ pnpm-debug.log*
 CLAUDE.md
 .claude/
 
+# Project
+PLAN.md
+
 # Test coverage
 coverage/
 
