@@ -34,20 +34,54 @@
 
       <!-- 下钻配置 -->
       <template v-if="clickAction.type === 'drillDown'">
-        <div class="property-row">
-          <span class="property-label">下级接口</span>
-          <n-input
-            v-model:value="clickAction.apiEndpoint"
-            size="small"
-            placeholder="/api/drilldown"
-          />
+        <div class="drill-levels-section">
+          <div class="property-section-title">下钻层级</div>
+          <div
+            v-for="(level, index) in drillLevels"
+            :key="index"
+            class="drill-level-item"
+          >
+            <div class="drill-level-header">
+              <span class="drill-level-num">L{{ index + 1 }}</span>
+              <n-input
+                v-model:value="level.name"
+                size="tiny"
+                placeholder="层级名称"
+                class="drill-level-name"
+              />
+              <n-button
+                size="tiny"
+                quaternary
+                type="error"
+                @click="removeDrillLevel(index)"
+              >
+                x
+              </n-button>
+            </div>
+            <div class="drill-level-fields">
+              <n-input
+                v-model:value="level.field"
+                size="tiny"
+                placeholder="字段名"
+              />
+              <n-input
+                v-model:value="level.apiEndpoint"
+                size="tiny"
+                placeholder="API 接口（可选）"
+              />
+            </div>
+          </div>
+          <n-button size="tiny" dashed block @click="addDrillLevel">
+            + 添加层级
+          </n-button>
         </div>
+
         <div class="property-row">
-          <span class="property-label">参数名</span>
-          <n-input
-            v-model:value="clickAction.paramName"
+          <span class="property-label">行为</span>
+          <n-select
+            v-model:value="clickAction.behavior"
             size="small"
-            placeholder="parentId"
+            :options="behaviorOptions"
           />
         </div>
         <div class="property-row">
@@ -128,7 +162,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { useCanvasStore } from '@/stores/canvas'
 
 const props = defineProps({
@@ -144,11 +178,16 @@ const clickAction = reactive({
   type: props.component.interaction?.click?.type || 'none',
   url: props.component.interaction?.click?.url || '',
   target: props.component.interaction?.click?.target || '_blank',
-  apiEndpoint: props.component.interaction?.click?.apiEndpoint || '',
-  paramName: props.component.interaction?.click?.paramName || '',
+  behavior: props.component.interaction?.click?.behavior || 'replace',
   showBreadcrumb: props.component.interaction?.click?.showBreadcrumb ?? true,
   targets: props.component.interaction?.click?.targets || []
 })
+
+const drillLevels = reactive(
+  props.component.interaction?.click?.levels?.length > 0
+    ? props.component.interaction.click.levels.map(l => ({ ...l }))
+    : [{ name: '第一级', field: '', apiEndpoint: '' }]
+)
 
 const hoverEffect = reactive({
   enabled: props.component.interaction?.hover?.enabled ?? false,
@@ -161,6 +200,41 @@ const animation = reactive({
   duration: props.component.animation?.duration || 500
 })
 
+// 保存到 store
+const saveInteraction = () => {
+  canvasStore.updateComponent(props.component.id, {
+    interaction: {
+      click: {
+        ...clickAction,
+        levels: clickAction.type === 'drillDown' ? [...drillLevels] : undefined
+      },
+      hover: { ...hoverEffect }
+    }
+  })
+}
+
+const saveAnimation = () => {
+  canvasStore.updateComponent(props.component.id, {
+    animation: { ...animation }
+  })
+}
+
+const addDrillLevel = () => {
+  drillLevels.push({ name: `第${drillLevels.length + 1}级`, field: '', apiEndpoint: '' })
+}
+
+const removeDrillLevel = (index) => {
+  if (drillLevels.length > 1) {
+    drillLevels.splice(index, 1)
+  }
+}
+
+// 监听变化并保存
+watch(clickAction, saveInteraction, { deep: true })
+watch(drillLevels, saveInteraction, { deep: true })
+watch(hoverEffect, saveInteraction, { deep: true })
+watch(animation, saveAnimation, { deep: true })
+
 const actionOptions = [
   { label: '无', value: 'none' },
   { label: '跳转链接', value: 'link' },
@@ -171,6 +245,11 @@ const actionOptions = [
 const targetOptions = [
   { label: '新窗口', value: '_blank' },
   { label: '当前窗口', value: '_self' }
+]
+
+const behaviorOptions = [
+  { label: '替换数据', value: 'replace' },
+  { label: '弹窗展示', value: 'modal' }
 ]
 
 const componentOptions = canvasStore.components
@@ -197,3 +276,42 @@ const animationOptions = [
   { label: '弹跳', value: 'bounceIn' }
 ]
 </script>
+
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
+
+.drill-levels-section {
+  margin-bottom: $spacing-sm;
+}
+
+.drill-level-item {
+  background: $bg-dark;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.drill-level-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.drill-level-num {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: 600;
+  min-width: 24px;
+}
+
+.drill-level-name {
+  flex: 1;
+}
+
+.drill-level-fields {
+  display: flex;
+  gap: $spacing-xs;
+}
+</style>
