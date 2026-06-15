@@ -103,7 +103,12 @@ export const componentRegistry = [
       filtering: true,
       stripe: true,
       border: true,
-      columns: []
+      columns: [
+        { key: 'region', title: '区域', sortable: true, filterable: true },
+        { key: 'product', title: '产品', sortable: true, filterable: true },
+        { key: 'sales', title: '销售额', sortable: true, align: 'right', formatter: 'currency' },
+        { key: 'count', title: '销量', sortable: true, align: 'right' }
+      ]
     },
     defaultSize: { width: 800, height: 400 }
   },
@@ -129,7 +134,26 @@ export const componentRegistry = [
     defaultProps: {
       layout: 'inline',
       labelWidth: 80,
-      fields: []
+      fields: [
+        {
+          key: 'dateRange',
+          type: 'daterange',
+          label: '日期范围',
+          placeholder: '选择日期范围'
+        },
+        {
+          key: 'category',
+          type: 'select',
+          label: '产品类别',
+          placeholder: '请选择',
+          options: [
+            { label: '全部', value: '' },
+            { label: '电子产品', value: 'electronics' },
+            { label: '食品', value: 'food' },
+            { label: '服装', value: 'clothing' }
+          ]
+        }
+      ]
     },
     defaultSize: { width: 600, height: 100 }
   },

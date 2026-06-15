@@ -6,6 +6,7 @@ import App from './App.vue'
 
 import './styles/variables.scss'
 import './styles/editor.scss'
+import './styles/animations.scss'
 
 const app = createApp(App)
 
