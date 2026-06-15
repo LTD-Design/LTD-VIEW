@@ -1,5 +1,9 @@
 <template>
-  <div class="component-renderer" :style="rendererStyle">
+  <div
+    class="component-renderer"
+    :style="rendererStyle"
+    :class="rendererClasses"
+  >
     <!-- 图表组件 -->
     <template v-if="isChart">
       <ChartComponent :type="component.type" :config="component" />
@@ -116,6 +120,28 @@ const rendererStyle = computed(() => ({
   borderRadius: `${props.component.style?.borderRadius || 0}px`,
   opacity: props.component.style?.opacity ?? 1
 }))
+
+// 动画和悬停效果类名
+const rendererClasses = computed(() => {
+  const classes = []
+
+  // 入场动画
+  const entrance = props.component.animation?.entrance
+  if (entrance) {
+    classes.push(`anim-${entrance}`)
+  }
+
+  // 悬停效果
+  const hover = props.component.interaction?.hover
+  if (hover?.enabled) {
+    classes.push('hover-scale')
+    if (hover.shadow && hover.shadow !== 'none') {
+      classes.push(`hover-shadow-${hover.shadow}`)
+    }
+  }
+
+  return classes
+})
 
 // 标题样式
 const titleStyle = computed(() => ({
