@@ -1,5 +1,6 @@
 <template>
   <div class="form-component">
+    <!-- 筛选器（多字段表单） -->
     <template v-if="type === 'form-filter'">
       <div class="filter-form">
         <div class="filter-title" v-if="config.props?.title">
@@ -10,28 +11,83 @@
           :label-width="config.props?.labelWidth || 80"
           size="small"
         >
-          <n-form-item label="日期范围">
-            <n-date-picker
-              type="daterange"
-              size="small"
-              placeholder="选择日期范围"
-            />
-          </n-form-item>
-          <n-form-item label="产品类别">
-            <n-select
-              size="small"
-              placeholder="请选择"
-              :options="categoryOptions"
-              style="width: 160px"
-            />
-          </n-form-item>
+          <template v-for="(field, index) in formFields" :key="field.key">
+            <n-form-item :label="field.label">
+              <!-- 输入框 -->
+              <n-input
+                v-if="field.type === 'input'"
+                v-model:value="fieldValues[field.key]"
+                :placeholder="field.placeholder || '请输入'"
+                size="small"
+                clearable
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+
+              <!-- 下拉选择 -->
+              <n-select
+                v-else-if="field.type === 'select'"
+                v-model:value="fieldValues[field.key]"
+                :placeholder="field.placeholder || '请选择'"
+                :options="field.options || []"
+                size="small"
+                clearable
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+
+              <!-- 日期选择 -->
+              <n-date-picker
+                v-else-if="field.type === 'date'"
+                v-model:value="fieldValues[field.key]"
+                :type="field.dateType || 'date'"
+                :placeholder="field.placeholder || '请选择日期'"
+                size="small"
+                clearable
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+
+              <!-- 日期范围 -->
+              <n-date-picker
+                v-else-if="field.type === 'daterange'"
+                v-model:value="fieldValues[field.key]"
+                type="daterange"
+                :placeholder="field.placeholder || '选择日期范围'"
+                size="small"
+                clearable
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+
+              <!-- 开关 -->
+              <n-switch
+                v-else-if="field.type === 'switch'"
+                v-model:value="fieldValues[field.key]"
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+
+              <!-- 滑块 -->
+              <n-slider
+                v-else-if="field.type === 'slider'"
+                v-model:value="fieldValues[field.key]"
+                :min="field.min || 0"
+                :max="field.max || 100"
+                :step="field.step || 1"
+                @update:value="handleFieldChange(field.key, $event)"
+              />
+            </n-form-item>
+          </template>
+
           <n-form-item>
-            <n-button type="primary" size="small">查询</n-button>
+            <n-button type="primary" size="small" @click="handleSearch">
+              查询
+            </n-button>
+            <n-button size="small" @click="handleReset" style="margin-left: 8px;">
+              重置
+            </n-button>
           </n-form-item>
         </n-form>
       </div>
     </template>
 
+    <!-- 输入框 -->
     <template v-else-if="type === 'form-input'">
       <div class="form-item-wrapper">
         <div class="form-label" v-if="config.props?.label">
@@ -41,10 +97,12 @@
           :value="config.props?.value"
           :placeholder="config.props?.placeholder || '请输入'"
           size="small"
+          @update:value="handleSimpleChange"
         />
       </div>
     </template>
 
+    <!-- 下拉选择 -->
     <template v-else-if="type === 'form-select'">
       <div class="form-item-wrapper">
         <div class="form-label" v-if="config.props?.label">
@@ -55,10 +113,12 @@
           :placeholder="config.props?.placeholder || '请选择'"
           :options="config.props?.options || []"
           size="small"
+          @update:value="handleSimpleChange"
         />
       </div>
     </template>
 
+    <!-- 日期选择 -->
     <template v-else-if="type === 'form-date'">
       <div class="form-item-wrapper">
         <div class="form-label" v-if="config.props?.label">
@@ -69,6 +129,7 @@
           :placeholder="config.props?.placeholder || '请选择日期'"
           :type="config.props?.type || 'date'"
           size="small"
+          @update:value="handleSimpleChange"
         />
       </div>
     </template>
@@ -82,7 +143,10 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, reactive, computed, watch } from 'vue'
+import { useCanvasStore } from '@/stores/canvas'
+
+const props = defineProps({
   type: {
     type: String,
     required: true
@@ -93,12 +157,89 @@ defineProps({
   }
 })
 
-const categoryOptions = [
-  { label: '全部', value: '' },
-  { label: '电子产品', value: 'electronics' },
-  { label: '食品', value: 'food' },
-  { label: '服装', value: 'clothing' }
-]
+const emit = defineEmits(['field-change', 'search'])
+
+const canvasStore = useCanvasStore()
+
+// 表单字段定义
+const formFields = computed(() => {
+  if (props.config.props?.fields?.length > 0) {
+    return props.config.props.fields
+  }
+  // 默认字段
+  return [
+    {
+      key: 'dateRange',
+      type: 'daterange',
+      label: '日期范围',
+      placeholder: '选择日期范围'
+    },
+    {
+      key: 'category',
+      type: 'select',
+      label: '产品类别',
+      placeholder: '请选择',
+      options: [
+        { label: '全部', value: '' },
+        { label: '电子产品', value: 'electronics' },
+        { label: '食品', value: 'food' },
+        { label: '服装', value: 'clothing' }
+      ]
+    }
+  ]
+})
+
+// 表单值
+const fieldValues = reactive({})
+
+// 初始化表单值
+const initValues = () => {
+  formFields.value.forEach(field => {
+    if (fieldValues[field.key] === undefined) {
+      fieldValues[field.key] = field.defaultValue ?? (field.type === 'switch' ? false : null)
+    }
+  })
+}
+
+// 监听字段变化（联动其他组件）
+const handleFieldChange = (key, value) => {
+  fieldValues[key] = value
+  emit('field-change', { key, value, allValues: { ...fieldValues } })
+
+  // 触发联动：更新画布中其他组件的数据
+  const linkage = props.config.linkage
+  if (linkage?.targets?.length > 0) {
+    linkage.targets.forEach(targetId => {
+      const target = canvasStore.components.find(c => c.id === targetId)
+      if (target) {
+        // 传递筛选参数给目标组件
+        canvasStore.updateComponentProps(targetId, {
+          filterParams: { ...fieldValues }
+        })
+      }
+    })
+  }
+}
+
+const handleSearch = () => {
+  emit('search', { ...fieldValues })
+}
+
+const handleReset = () => {
+  formFields.value.forEach(field => {
+    fieldValues[field.key] = field.defaultValue ?? (field.type === 'switch' ? false : null)
+  })
+  handleSearch()
+}
+
+// 简单表单值变化
+const handleSimpleChange = (value) => {
+  canvasStore.updateComponentProps(props.config.id, { value })
+}
+
+// 初始化
+initValues()
+watch(formFields, initValues, { deep: true })
 </script>
 
 <style scoped lang="scss">
