@@ -18,9 +18,17 @@
     </div>
 
     <div class="editor-actions">
-      <n-button size="small" @click="handleExport">
-        导出配置
+      <n-dropdown :options="exportOptions" @select="handleExportSelect" trigger="click">
+        <n-button size="small">
+          导出
+          <template #icon><n-icon><DownOutlined /></n-icon></template>
+        </n-button>
+      </n-dropdown>
+
+      <n-button size="small" @click="handleImport">
+        导入
       </n-button>
+
       <n-button size="small" type="primary" @click="handlePreview">
         预览
       </n-button>
@@ -29,25 +37,29 @@
 </template>
 
 <script setup>
-import { h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMessage, useDialog } from 'naive-ui'
-import { UndoOutlined, RedoOutlined } from '@vicons/antd'
+import { UndoOutlined, RedoOutlined, DownOutlined } from '@vicons/antd'
 import { useCanvasStore } from '@/stores/canvas'
+import { exportToHtml, downloadHtml } from '@/utils/exportHtml'
+import { themes, chartColors } from '@/config/themes'
 
 const router = useRouter()
 const message = useMessage()
 const dialog = useDialog()
 const canvasStore = useCanvasStore()
 
+const exportOptions = [
+  { label: '导出 JSON 配置', key: 'json' },
+  { label: '导出独立 HTML', key: 'html' }
+]
+
 const handleUndo = () => {
   canvasStore.undo()
-  message.info('已撤销')
 }
 
 const handleRedo = () => {
   canvasStore.redo()
-  message.info('已重做')
 }
 
 const handleClear = () => {
@@ -63,7 +75,15 @@ const handleClear = () => {
   })
 }
 
-const handleExport = () => {
+const handleExportSelect = (key) => {
+  if (key === 'json') {
+    exportJson()
+  } else if (key === 'html') {
+    exportHtml()
+  }
+}
+
+const exportJson = () => {
   const config = canvasStore.exportConfig()
   const json = JSON.stringify(config, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
@@ -73,7 +93,34 @@ const handleExport = () => {
   a.download = `${config.name || 'dashboard'}.json`
   a.click()
   URL.revokeObjectURL(url)
-  message.success('配置已导出')
+  message.success('JSON 配置已导出')
+}
+
+const exportHtml = () => {
+  const config = canvasStore.exportConfig()
+  const html = exportToHtml(config, canvasStore.components, { themes, chartColors })
+  downloadHtml(html, `${config.name || 'dashboard'}.html`)
+  message.success('HTML 文件已导出')
+}
+
+const handleImport = () => {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.onchange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const config = JSON.parse(text)
+      canvasStore.importConfig(config)
+      message.success('配置已导入')
+    } catch (err) {
+      message.error('配置文件格式错误')
+    }
+  }
+  input.click()
 }
 
 const handlePreview = () => {
