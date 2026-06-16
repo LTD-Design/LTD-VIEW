@@ -13,7 +13,9 @@ export function useExportDashboard(canvasStore) {
     const a = document.createElement('a')
     a.href = url
     a.download = `${config.name || 'dashboard'}.json`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
     URL.revokeObjectURL(url)
     message.success('JSON 配置已导出')
   }

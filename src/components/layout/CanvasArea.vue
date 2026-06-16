@@ -543,6 +543,8 @@ const handleDrop = (event) => {
   const componentConfig = getComponentByType(component.type)
   if (!componentConfig) return
 
+  if (!canvasRef.value) return
+
   // 计算放置位置
   const canvasRect = canvasRef.value.getBoundingClientRect()
   const scale = zoom.value / 100

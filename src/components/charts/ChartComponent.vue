@@ -431,8 +431,6 @@ const handleLinkage = () => {
 const updateChart = () => {
   if (chartInstance) {
     chartInstance.setOption(getChartOption(), true)
-    // 重新绑定事件（因为 setOption 会重置事件）
-    bindChartEvents()
   }
 }
 

@@ -14,6 +14,16 @@ import {
   BORDER_RADIUS
 } from '@/config/colors'
 
+function escapeHtml(str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 /**
  * 生成图表的 ECharts option 配置（字符串形式）
  */
@@ -153,7 +163,7 @@ function generateTableHtml(component) {
  */
 function generateComponentHtml(component, themes) {
   const titleHtml = component.props?.title
-    ? `<div style="font-size:14px;font-weight:500;color:${TEXT_PRIMARY};padding:4px 8px">${component.props.title}</div>`
+    ? `<div style="font-size:14px;font-weight:500;color:${TEXT_PRIMARY};padding:4px 8px">${escapeHtml(component.props.title)}</div>`
     : ''
 
   const bgStyle = component.style?.background ? `background:${component.style.background};` : ''
@@ -190,23 +200,23 @@ function generateComponentHtml(component, themes) {
       content = generateFormHtml(component)
       break
     case 'title':
-      content = `<div style="width:100%;height:100%;display:flex;align-items:center;padding:0 16px;color:${component.props?.color || TEXT_PRIMARY};font-size:${component.props?.level === 1 ? '24px' : '16px'};font-weight:600;text-align:${component.props?.align || 'left'}">${component.props?.text || '标题'}</div>`
+      content = `<div style="width:100%;height:100%;display:flex;align-items:center;padding:0 16px;color:${component.props?.color || TEXT_PRIMARY};font-size:${component.props?.level === 1 ? '24px' : '16px'};font-weight:600;text-align:${component.props?.align || 'left'}">${escapeHtml(component.props?.text || '标题')}</div>`
       break
     case 'subtitle':
-      content = `<div style="width:100%;height:100%;display:flex;align-items:center;padding:0 16px;color:${component.props?.color || TEXT_SECONDARY};font-size:14px;text-align:${component.props?.align || 'left'}">${component.props?.text || '副标题'}</div>`
+      content = `<div style="width:100%;height:100%;display:flex;align-items:center;padding:0 16px;color:${component.props?.color || TEXT_SECONDARY};font-size:14px;text-align:${component.props?.align || 'left'}">${escapeHtml(component.props?.text || '副标题')}</div>`
       break
     case 'number':
-      content = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${COLOR_PRIMARY};font-size:32px;font-weight:700">${component.props?.prefix || ''}${component.props?.value || 0}${component.props?.suffix || ''}</div>`
+      content = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${COLOR_PRIMARY};font-size:32px;font-weight:700">${escapeHtml(component.props?.prefix || '')}${escapeHtml(String(component.props?.value || 0))}${escapeHtml(component.props?.suffix || '')}</div>`
       break
     case 'kpi-card':
-      content = `<div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${component.props?.color || '#18a058'}20;color:${component.props?.color || '#18a058'}">&#8593;</div><span style="font-size:13px;color:${TEXT_SECONDARY}">${component.props?.label || '指标'}</span></div><div style="font-size:28px;font-weight:700;color:${TEXT_PRIMARY}">${component.props?.prefix || ''}${component.props?.value || 0}${component.props?.suffix || ''}</div>${component.props?.trendValue ? `<div style="font-size:12px;color:${component.props?.trend === 'up' ? COLOR_SUCCESS : COLOR_ERROR};margin-top:4px">${component.props.trendValue}</div>` : ''}</div>`
+      content = `<div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${component.props?.color || '#18a058'}20;color:${component.props?.color || '#18a058'}">&#8593;</div><span style="font-size:13px;color:${TEXT_SECONDARY}">${escapeHtml(component.props?.label || '指标')}</span></div><div style="font-size:28px;font-weight:700;color:${TEXT_PRIMARY}">${escapeHtml(component.props?.prefix || '')}${escapeHtml(String(component.props?.value || 0))}${escapeHtml(component.props?.suffix || '')}</div>${component.props?.trendValue ? `<div style="font-size:12px;color:${component.props?.trend === 'up' ? COLOR_SUCCESS : COLOR_ERROR};margin-top:4px">${escapeHtml(component.props.trendValue)}</div>` : ''}</div>`
       break
     case 'progress-bar':
       content = `<div style="width:100%;height:100%;display:flex;align-items:center;padding:4px 16px;gap:8px"><div style="flex:1;height:${component.props?.height || 8}px;background:${component.props?.trackColor || '#1e3a5f'};border-radius:${(component.props?.height || 8) / 2}px;overflow:hidden"><div style="height:100%;width:${Math.min(100, ((component.props?.value || 0) / (component.props?.max || 100)) * 100)}%;background:${component.props?.color || '#2080f0'};border-radius:inherit"></div></div>${component.props?.showLabel !== false ? `<span style="font-size:12px;color:${TEXT_SECONDARY};white-space:nowrap">${component.props?.value || 0}%</span>` : ''}</div>`
       break
     case 'video':
       content = component.props?.src
-        ? `<video src="${component.props.src}"${component.props.autoplay ? ' autoplay' : ''}${component.props.loop ? ' loop' : ''}${component.props.muted ? ' muted' : ''}${component.props.controls !== false ? ' controls' : ''} style="width:100%;height:100%;object-fit:${component.props?.fit || 'contain'}"></video>`
+        ? `<video src="${escapeHtml(component.props.src)}"${component.props.autoplay ? ' autoplay' : ''}${component.props.loop ? ' loop' : ''}${component.props.muted ? ' muted' : ''}${component.props.controls !== false ? ' controls' : ''} style="width:100%;height:100%;object-fit:${component.props?.fit || 'contain'}"></video>`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${BG_CARD};color:${TEXT_MUTED}">视频</div>`
       break
     case 'rank-list':
@@ -214,7 +224,7 @@ function generateComponentHtml(component, themes) {
       break
     case 'image':
       content = component.props?.src
-        ? `<img src="${component.props.src}" style="width:100%;height:100%;object-fit:${component.props?.fit || 'contain'}" />`
+        ? `<img src="${escapeHtml(component.props.src)}" style="width:100%;height:100%;object-fit:${component.props?.fit || 'contain'}" />`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${BG_CARD};color:${TEXT_MUTED}">图片</div>`
       break
     case 'divider':
@@ -224,21 +234,21 @@ function generateComponentHtml(component, themes) {
           : `<div style="width:100%;height:${component.props?.width || 1}px;background:${component.props?.color || BORDER_COLOR};margin:auto 0"></div>`
       break
     case 'card':
-      content = `<div style="width:100%;height:100%;background:${BG_CARD};border:1px solid ${BORDER_COLOR};border-radius:${BORDER_RADIUS}px;display:flex;flex-direction:column;overflow:hidden">${component.props?.title ? `<div style="padding:16px;font-size:14px;font-weight:500;color:${TEXT_PRIMARY};border-bottom:1px solid ${BORDER_COLOR}">${component.props.title}</div>` : ''}<div style="flex:1;padding:16px"></div></div>`
+      content = `<div style="width:100%;height:100%;background:${BG_CARD};border:1px solid ${BORDER_COLOR};border-radius:${BORDER_RADIUS}px;display:flex;flex-direction:column;overflow:hidden">${component.props?.title ? `<div style="padding:16px;font-size:14px;font-weight:500;color:${TEXT_PRIMARY};border-bottom:1px solid ${BORDER_COLOR}">${escapeHtml(component.props.title)}</div>` : ''}<div style="flex:1;padding:16px"></div></div>`
       break
     case 'tab-container': {
       const tabs = component.props?.tabs || [{ label: '标签 1' }, { label: '标签 2' }]
       const tabBtns = tabs
         .map(
           (t, i) =>
-            `<div style="padding:8px 16px;font-size:13px;color:${i === 0 ? '#2080f0' : '#a0aec0'};border-bottom:2px solid ${i === 0 ? '#2080f0' : 'transparent'};cursor:pointer">${t.label}</div>`
+            `<div style="padding:8px 16px;font-size:13px;color:${i === 0 ? '#2080f0' : '#a0aec0'};border-bottom:2px solid ${i === 0 ? '#2080f0' : 'transparent'};cursor:pointer">${escapeHtml(t.label)}</div>`
         )
         .join('')
       content = `<div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden"><div style="display:flex;gap:2px;padding:0 8px;background:rgba(0,0,0,0.2);border-bottom:1px solid ${BORDER_COLOR};flex-shrink:0">${tabBtns}</div><div style="flex:1;padding:16px;overflow:auto"></div></div>`
       break
     }
     case 'marquee':
-      content = `<div style="width:100%;height:100%;overflow:hidden;display:flex;align-items:center"><div style="display:inline-flex;white-space:nowrap;animation:marquee-scroll ${10 / (component.props?.speed || 3)}s linear infinite"><span style="color:${component.props?.color || '#ffffff'};font-size:${component.props?.fontSize || 16}px;font-weight:${component.props?.fontWeight || '400'};padding-right:60px">${component.props?.text || '滚动文字'}</span><span style="color:${component.props?.color || '#ffffff'};font-size:${component.props?.fontSize || 16}px;font-weight:${component.props?.fontWeight || '400'};padding-right:60px">${component.props?.text || '滚动文字'}</span></div></div>`
+      content = `<div style="width:100%;height:100%;overflow:hidden;display:flex;align-items:center"><div style="display:inline-flex;white-space:nowrap;animation:marquee-scroll ${10 / (component.props?.speed || 3)}s linear infinite"><span style="color:${component.props?.color || '#ffffff'};font-size:${component.props?.fontSize || 16}px;font-weight:${component.props?.fontWeight || '400'};padding-right:60px">${escapeHtml(component.props?.text || '滚动文字')}</span><span style="color:${component.props?.color || '#ffffff'};font-size:${component.props?.fontSize || 16}px;font-weight:${component.props?.fontWeight || '400'};padding-right:60px">${escapeHtml(component.props?.text || '滚动文字')}</span></div></div>`
       break
     case 'datav-border':
       content = `<div style="width:100%;height:100%;border:2px solid ${component.props?.color || '#2080f0'};border-radius:4px;position:relative"><div style="position:absolute;top:0;left:0;width:100%;height:100%;border:1px solid ${component.props?.color || '#2080f0'};opacity:0.3;border-radius:2px"></div></div>`
@@ -285,7 +295,7 @@ function generateComponentHtml(component, themes) {
  */
 function generateRankListHtml(component) {
   const titleHtml = component.props?.title
-    ? `<div style="font-size:14px;font-weight:500;color:${TEXT_PRIMARY};padding:4px 8px">${component.props.title}</div>`
+    ? `<div style="font-size:14px;font-weight:500;color:${TEXT_PRIMARY};padding:4px 8px">${escapeHtml(component.props.title)}</div>`
     : ''
   const data = component.data?.source || []
   const sorted = [...data].sort((a, b) => (b.value || 0) - (a.value || 0))
