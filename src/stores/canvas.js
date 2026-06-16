@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 const STORAGE_KEY = 'ltd-view-dashboard-draft'
 
+let saveHistoryTimer = null
+
 function loadDraft() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -139,12 +141,8 @@ export const useCanvasStore = defineStore('canvas', {
 
     // 删除选中的组件
     removeSelected() {
-      if (this.selectedId) {
-        this.removeComponent(this.selectedId)
-      }
-      if (this.selectedIds.length > 0) {
-        this.selectedIds.forEach((id) => this.removeComponent(id))
-      }
+      const idsToRemove = [...(this.selectedId ? [this.selectedId] : []), ...this.selectedIds]
+      idsToRemove.forEach((id) => this.removeComponent(id))
     },
 
     // 选中组件
@@ -227,29 +225,26 @@ export const useCanvasStore = defineStore('canvas', {
       }
     },
 
-    // 保存历史记录
+    // 保存历史记录（防抖 300ms）
     saveHistory() {
-      // 移除当前位置之后的历史记录
-      this.history = this.history.slice(0, this.historyIndex + 1)
+      if (saveHistoryTimer) clearTimeout(saveHistoryTimer)
+      saveHistoryTimer = setTimeout(() => {
+        // 移除当前位置之后的历史记录
+        this.history = this.history.slice(0, this.historyIndex + 1)
 
-      // 快照时排除 data.source 大字段，节省内存
-      const snapshot = this.components.map((c) => {
-        if (c.data?.source) {
-          return { ...c, data: { ...c.data, source: undefined } }
+        const snapshot = this.components.map((c) => ({ ...c }))
+        this.history.push(JSON.stringify(snapshot))
+
+        // 限制历史记录数量
+        if (this.history.length > this.maxHistory) {
+          this.history.shift()
+        } else {
+          this.historyIndex++
         }
-        return c
-      })
-      this.history.push(JSON.stringify(snapshot))
 
-      // 限制历史记录数量
-      if (this.history.length > this.maxHistory) {
-        this.history.shift()
-      } else {
-        this.historyIndex++
-      }
-
-      // 自动保存到 localStorage
-      this._persistDraft()
+        // 自动保存到 localStorage
+        this._persistDraft()
+      }, 300)
     },
 
     // 持久化草稿到 localStorage
