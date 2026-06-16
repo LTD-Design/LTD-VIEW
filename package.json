@@ -1,7 +1,6 @@
 {
   "name": "ltd-view",
   "version": "0.1.0",
-  "private": true,
   "description": "BI 报表生成系统 - 支持拖拽式布局的可视化大屏报表工具",
   "type": "module",
   "scripts": {
@@ -12,36 +11,42 @@
     "format": "prettier --write src/",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "ANALYZE=true vite build",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@kjgl77/datav-vue3": "^1.7.4",
     "@vicons/antd": "^0.13.0",
-    "axios": "^1.7.0",
     "dayjs": "^1.11.0",
     "echarts": "^5.5.0",
     "lodash-es": "^4.17.0",
     "naive-ui": "^2.38.0",
     "pinia": "^2.1.0",
-    "sortablejs": "^1.15.0",
     "uuid": "^9.0.0",
     "vue": "^3.4.0",
-    "vue-router": "^4.3.0",
-    "vuedraggable": "^4.1.0"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.3.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/test-utils": "^2.4.11",
     "commitlint": "^19.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.27.0",
+    "happy-dom": "^20.10.3",
     "husky": "^9.1.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.3.0",
+    "rollup-plugin-visualizer": "^7.0.1",
     "sass": "^1.77.0",
     "vite": "^5.4.0",
-    "vitepress": "^1.3.0"
+    "vitepress": "^1.3.0",
+    "vitest": "^4.1.9"
   },
   "lint-staged": {
     "*.{vue,js,jsx,ts,tsx}": [
@@ -60,10 +65,14 @@
     "echarts",
     "vue3"
   ],
-  "author": "",
+  "author": "LtdView Contributors",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://gitee.com/ltd_1/ltd-view.git"
-  }
+  },
+  "bugs": {
+    "url": "https://gitee.com/ltd_1/ltd-view/issues"
+  },
+  "homepage": "https://gitee.com/ltd_1/ltd-view#readme"
 }
