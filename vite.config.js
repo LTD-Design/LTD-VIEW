@@ -30,8 +30,17 @@ export default defineConfig({
     open: true
   },
   build: {
-    target: 'esnext',
+    target: 'es2020',
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          echarts: ['echarts/core', 'echarts/charts', 'echarts/components', 'echarts/renderers'],
+          'naive-ui': ['naive-ui'],
+          datav: ['@kjgl77/datav-vue3']
+        }
+      }
+    }
   }
 })

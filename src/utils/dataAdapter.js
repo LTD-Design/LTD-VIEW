@@ -75,7 +75,8 @@ async function fetchApiData(dataSource) {
     }
 
     return Array.isArray(data) ? data : []
-  } catch {
+  } catch (err) {
+    console.warn('[LtdView] API 数据获取失败:', err.message || err)
     return []
   }
 }
