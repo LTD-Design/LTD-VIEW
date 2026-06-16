@@ -7,12 +7,12 @@
       @drill-to="handleDrillTo"
     />
 
-    <div class="table-title" v-if="config.props?.title">
+    <div v-if="config.props?.title" class="table-title">
       {{ config.props.title }}
     </div>
 
     <!-- 列筛选栏 -->
-    <div class="table-filters" v-if="config.props?.filtering && filterableColumns.length > 0">
+    <div v-if="config.props?.filtering && filterableColumns.length > 0" class="table-filters">
       <n-select
         v-for="col in filterableColumns"
         :key="col.key"
@@ -102,7 +102,7 @@ const rawData = computed(() => {
 const filterableColumns = computed(() => {
   if (!props.config.props?.filtering) return []
   if (props.config.props?.columns?.length > 0) {
-    return props.config.props.columns.filter(col => col.filterable)
+    return props.config.props.columns.filter((col) => col.filterable)
   }
   return [
     { key: 'region', title: '区域' },
@@ -111,36 +111,36 @@ const filterableColumns = computed(() => {
 })
 
 const getFilterOptions = (key) => {
-  const values = [...new Set(rawData.value.map(d => d[key]).filter(Boolean))]
-  return values.map(v => ({ label: v, value: v }))
+  const values = [...new Set(rawData.value.map((d) => d[key]).filter(Boolean))]
+  return values.map((v) => ({ label: v, value: v }))
 }
 
 // 筛选后的数据
 const filteredData = computed(() => {
-  let data = [...rawData.value]
+  const activeFilters = Object.entries(filterValues.value).filter(
+    ([, values]) => values && values.length > 0
+  )
 
-  Object.keys(filterValues.value).forEach(key => {
-    const values = filterValues.value[key]
-    if (values && values.length > 0) {
-      data = data.filter(d => values.includes(d[key]))
-    }
-  })
+  if (activeFilters.length === 0) return rawData.value
 
-  return data
+  return rawData.value.filter((d) =>
+    activeFilters.every(([key, values]) => values.includes(d[key]))
+  )
 })
 
 // 列配置
 const columns = computed(() => {
   if (props.config.props?.columns?.length > 0) {
-    return props.config.props.columns.map(col => ({
+    return props.config.props.columns.map((col) => ({
       title: col.title,
       key: col.key,
       width: col.width,
       align: col.align || 'left',
       sorter: props.config.props?.sorting ? 'default' : false,
-      render: col.formatter === 'currency'
-        ? (row) => `¥${Number(row[col.key]).toLocaleString()}`
-        : undefined
+      render:
+        col.formatter === 'currency'
+          ? (row) => `¥${Number(row[col.key]).toLocaleString()}`
+          : undefined
     }))
   }
 
@@ -184,7 +184,7 @@ const rowProps = (row) => ({
   onClick: (e) => handleRowClick(row, e)
 })
 
-const handleRowClick = (row, event) => {
+const handleRowClick = (row) => {
   emit('row-click', row)
 
   // 下钻处理
@@ -236,8 +236,8 @@ const handleLinkage = () => {
   const linkageTargets = props.config.interaction?.click?.targets
   if (!linkageTargets?.length) return
 
-  linkageTargets.forEach(targetId => {
-    const target = canvasStore.components.find(c => c.id === targetId)
+  linkageTargets.forEach((targetId) => {
+    const target = canvasStore.components.find((c) => c.id === targetId)
     if (target) {
       dataStore.initComponentData(target)
     }
@@ -255,13 +255,18 @@ onMounted(async () => {
   }
 })
 
-watch(() => props.config.props?.columns, () => {
-  filterValues.value = {}
-}, { deep: true })
+watch(
+  () => props.config.props?.columns,
+  () => {
+    filterValues.value = {}
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
 
 .table-component {
   width: 100%;
@@ -295,5 +300,6 @@ watch(() => props.config.props?.columns, () => {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  @include scrollbar;
 }
 </style>

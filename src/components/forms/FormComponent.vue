@@ -3,7 +3,7 @@
     <!-- 筛选器（多字段表单） -->
     <template v-if="type === 'form-filter'">
       <div class="filter-form">
-        <div class="filter-title" v-if="config.props?.title">
+        <div v-if="config.props?.title" class="filter-title">
           {{ config.props.title }}
         </div>
         <n-form
@@ -11,7 +11,7 @@
           :label-width="config.props?.labelWidth || 80"
           size="small"
         >
-          <template v-for="(field, index) in formFields" :key="field.key">
+          <template v-for="field in formFields" :key="field.key">
             <n-form-item :label="field.label">
               <!-- 输入框 -->
               <n-input
@@ -76,12 +76,8 @@
           </template>
 
           <n-form-item>
-            <n-button type="primary" size="small" @click="handleSearch">
-              查询
-            </n-button>
-            <n-button size="small" @click="handleReset" style="margin-left: 8px;">
-              重置
-            </n-button>
+            <n-button type="primary" size="small" @click="handleSearch"> 查询 </n-button>
+            <n-button size="small" style="margin-left: 8px" @click="handleReset"> 重置 </n-button>
           </n-form-item>
         </n-form>
       </div>
@@ -90,7 +86,7 @@
     <!-- 输入框 -->
     <template v-else-if="type === 'form-input'">
       <div class="form-item-wrapper">
-        <div class="form-label" v-if="config.props?.label">
+        <div v-if="config.props?.label" class="form-label">
           {{ config.props.label }}
         </div>
         <n-input
@@ -105,7 +101,7 @@
     <!-- 下拉选择 -->
     <template v-else-if="type === 'form-select'">
       <div class="form-item-wrapper">
-        <div class="form-label" v-if="config.props?.label">
+        <div v-if="config.props?.label" class="form-label">
           {{ config.props.label }}
         </div>
         <n-select
@@ -121,7 +117,7 @@
     <!-- 日期选择 -->
     <template v-else-if="type === 'form-date'">
       <div class="form-item-wrapper">
-        <div class="form-label" v-if="config.props?.label">
+        <div v-if="config.props?.label" class="form-label">
           {{ config.props.label }}
         </div>
         <n-date-picker
@@ -135,16 +131,15 @@
     </template>
 
     <template v-else>
-      <div class="form-placeholder">
-        未知表单类型: {{ type }}
-      </div>
+      <div class="form-placeholder">未知表单类型: {{ type }}</div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { useCanvasStore } from '@/stores/canvas'
+import { triggerLinkageTargets } from '@/utils/formLinkage'
 
 const props = defineProps({
   type: {
@@ -194,7 +189,7 @@ const fieldValues = reactive({})
 
 // 初始化表单值
 const initValues = () => {
-  formFields.value.forEach(field => {
+  formFields.value.forEach((field) => {
     if (fieldValues[field.key] === undefined) {
       fieldValues[field.key] = field.defaultValue ?? (field.type === 'switch' ? false : null)
     }
@@ -206,19 +201,8 @@ const handleFieldChange = (key, value) => {
   fieldValues[key] = value
   emit('field-change', { key, value, allValues: { ...fieldValues } })
 
-  // 触发联动：更新画布中其他组件的数据
-  const linkage = props.config.linkage
-  if (linkage?.targets?.length > 0) {
-    linkage.targets.forEach(targetId => {
-      const target = canvasStore.components.find(c => c.id === targetId)
-      if (target) {
-        // 传递筛选参数给目标组件
-        canvasStore.updateComponentProps(targetId, {
-          filterParams: { ...fieldValues }
-        })
-      }
-    })
-  }
+  // 触发联动
+  triggerLinkageTargets(canvasStore, null, props.config.linkage, fieldValues)
 }
 
 const handleSearch = () => {
@@ -226,7 +210,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  formFields.value.forEach(field => {
+  formFields.value.forEach((field) => {
     fieldValues[field.key] = field.defaultValue ?? (field.type === 'switch' ? false : null)
   })
   handleSearch()

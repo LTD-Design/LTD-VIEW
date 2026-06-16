@@ -1,14 +1,12 @@
 <template>
-  <div
-    class="preview-page"
-    :style="previewStyle"
-    @mousemove="handleMouseMove"
-  >
+  <div class="preview-page" :style="previewStyle" @mousemove="handleMouseMove">
     <!-- 控制按钮 -->
     <transition name="fade">
-      <div class="preview-controls" v-show="showControls">
+      <div v-show="showControls" class="preview-controls">
         <n-button quaternary size="small" @click="goBack">
-          <template #icon><n-icon><ArrowLeftOutlined /></n-icon></template>
+          <template #icon
+            ><n-icon><ArrowLeftOutlined /></n-icon
+          ></template>
           返回编辑
         </n-button>
 
@@ -33,12 +31,8 @@
     </transition>
 
     <!-- 画布 -->
-    <div class="preview-canvas-wrapper" ref="wrapperRef">
-      <div
-        class="preview-canvas"
-        :style="canvasStyle"
-        ref="canvasRef"
-      >
+    <div ref="wrapperRef" class="preview-canvas-wrapper">
+      <div ref="canvasRef" class="preview-canvas" :style="canvasStyle">
         <div
           v-for="component in canvasStore.components"
           :key="component.id"
@@ -52,23 +46,18 @@
 
     <!-- 分辨率信息 -->
     <transition name="fade">
-      <div class="preview-info" v-show="showControls">
-        {{ canvasStore.canvasConfig.width }} x {{ canvasStore.canvasConfig.height }}
-        | 缩放 {{ scalePercent }}%
-        | {{ fitModeLabels[fitMode] }}
+      <div v-show="showControls" class="preview-info">
+        {{ canvasStore.canvasConfig.width }} x {{ canvasStore.canvasConfig.height }} | 缩放
+        {{ scalePercent }}% | {{ fitModeLabels[fitMode] }}
       </div>
     </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  ArrowLeftOutlined,
-  FullscreenOutlined,
-  FullscreenExitOutlined
-} from '@vicons/antd'
+import { ArrowLeftOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@vicons/antd'
 import { useCanvasStore } from '@/stores/canvas'
 import ComponentRenderer from '@/components/base/ComponentRenderer.vue'
 

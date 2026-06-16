@@ -11,6 +11,7 @@ $bg-dark: #0a1929;
 $bg-card: #0d192d;
 $bg-hover: #1a2a3a;
 $bg-active: #1e3a5f;
+$bg-canvas-wrapper: #071422;
 
 // 文本颜色
 $text-primary: #ffffff;
@@ -53,5 +54,7 @@ $transition-normal: 0.3s ease;
 $transition-slow: 0.5s ease;
 
 // 字体
-$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-$font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;
+$font-family:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-mono:
+  'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono', 'Source Code Pro', monospace;

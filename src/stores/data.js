@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchComponentData, mapData, filterDataByParams, generateDrillData } from '@/utils/dataAdapter'
+import { fetchComponentData, mapData, filterDataByParams } from '@/utils/dataAdapter'
 import { drillManager } from '@/utils/drillDown'
 
 export const useDataStore = defineStore('data', {
@@ -11,7 +11,10 @@ export const useDataStore = defineStore('data', {
     drillBreadcrumbs: {},
 
     // 当前组件的下钻层级 { componentId: number }
-    drillLevels: {}
+    drillLevels: {},
+
+    // 轮询定时器 { componentId: intervalId }
+    _pollTimers: {}
   }),
 
   getters: {
@@ -64,6 +67,9 @@ export const useDataStore = defineStore('data', {
 
         // 设置下钻管理器的初始数据
         drillManager.setCurrentData(id, rawData)
+
+        // 启动轮询
+        this.startPolling(component)
 
         return mappedData
       } catch (error) {
@@ -163,6 +169,47 @@ export const useDataStore = defineStore('data', {
       delete this.drillBreadcrumbs[componentId]
       delete this.drillLevels[componentId]
       drillManager.reset(componentId)
+      this.stopPolling(componentId)
+    },
+
+    /**
+     * 启动 API 数据轮询
+     */
+    startPolling(component) {
+      const id = component.id
+      const interval = component.data?.refreshInterval
+      if (!interval || interval <= 0 || component.data?.type !== 'api') return
+
+      this.stopPolling(id)
+
+      this._pollTimers[id] = setInterval(async () => {
+        if (this.componentData[id]?.loading) return
+        try {
+          this.componentData[id].loading = true
+          const rawData = await fetchComponentData(component)
+          const mapping = component.data?.mapping || {}
+          const mappedData = mapData(rawData, mapping)
+          this.componentData[id].raw = rawData
+          this.componentData[id].mapped = mappedData
+          drillManager.setCurrentData(id, rawData)
+        } catch {
+          // silent fail on poll
+        } finally {
+          if (this.componentData[id]) {
+            this.componentData[id].loading = false
+          }
+        }
+      }, interval)
+    },
+
+    /**
+     * 停止轮询
+     */
+    stopPolling(componentId) {
+      if (this._pollTimers[componentId]) {
+        clearInterval(this._pollTimers[componentId])
+        delete this._pollTimers[componentId]
+      }
     }
   }
 })
