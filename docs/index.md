@@ -22,7 +22,10 @@ features:
     details: 组件库拖入画布，自由移动、调整大小，所见即所得的编辑体验
   - icon: 📊
     title: 丰富图表
-    details: 内置柱状图、折线图、饼图、仪表盘、雷达图等 ECharts 图表组件
+    details: 内置柱状图、折线图、饼图、散点图、漏斗图、热力图等 9 种 ECharts 图表
+  - icon: 🎭
+    title: DataV 装饰
+    details: 13 种科技感边框、10 种装饰器、轮播表格、数字翻牌器等大屏组件
   - icon: 📋
     title: 数据表格
     details: 支持排序、筛选、分页、列宽调整的数据表格，适合分析型仪表盘
@@ -38,7 +41,4 @@ features:
   - icon: 💾
     title: 导入导出
     details: 导出 JSON 配置可复用，导出独立 HTML 离线展示
-  - icon: 🎭
-    title: 多主题
-    details: 内置深色、科技蓝、自然绿、梦幻紫四套大屏主题，一键切换
 ---

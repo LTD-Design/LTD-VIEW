@@ -41,6 +41,9 @@ PLAN.md
 # Test coverage
 coverage/
 
+# Bundle analysis
+stats.html
+
 # Misc
 *.tgz
 .cache/

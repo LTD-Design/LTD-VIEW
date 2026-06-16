@@ -61,6 +61,24 @@ npm run build
 
 构建产物输出到 `dist/` 目录。
 
+## 测试
+
+```bash
+# 运行单元测试
+npm run test
+
+# 监听模式运行测试
+npm run test:watch
+```
+
+## Bundle 分析
+
+```bash
+npm run analyze
+```
+
+生成 `stats.html` 可视化分析报告。
+
 ## 文档开发
 
 ```bash
