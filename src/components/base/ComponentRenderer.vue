@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="component-renderer"
-    :style="rendererStyle"
-    :class="rendererClasses"
-  >
+  <div class="component-renderer" :style="rendererStyle" :class="rendererClasses">
     <!-- 图表组件 -->
     <template v-if="isChart">
       <ChartComponent :type="component.type" :config="component" />
@@ -11,7 +7,12 @@
 
     <!-- 表格组件 -->
     <template v-else-if="isTable">
-      <TableComponent :type="component.type" :config="component" />
+      <template v-if="component.type === 'rank-list'">
+        <RankListComponent :type="component.type" :config="component" />
+      </template>
+      <template v-else>
+        <TableComponent :type="component.type" :config="component" />
+      </template>
     </template>
 
     <!-- 表单组件 -->
@@ -36,6 +37,14 @@
       <NumberFlip :config="component.props" />
     </template>
 
+    <template v-else-if="component.type === 'kpi-card'">
+      <KpiCard :config="component.props" />
+    </template>
+
+    <template v-else-if="component.type === 'progress-bar'">
+      <ProgressBar :config="component.props" />
+    </template>
+
     <!-- 媒体组件 -->
     <template v-else-if="component.type === 'image'">
       <div class="media-image">
@@ -50,6 +59,10 @@
           <span>图片</span>
         </div>
       </div>
+    </template>
+
+    <template v-else-if="component.type === 'video'">
+      <VideoComponent :config="component.props" />
     </template>
 
     <!-- 装饰组件 -->
@@ -73,6 +86,47 @@
       </div>
     </template>
 
+    <template v-else-if="component.type === 'tab-container'">
+      <TabContainer :config="component.props" />
+    </template>
+
+    <template v-else-if="component.type === 'marquee'">
+      <MarqueeComponent :config="component.props" />
+    </template>
+
+    <!-- DataV 组件 -->
+    <template v-else-if="component.type === 'datav-border'">
+      <DatavBorder
+        :type="component.props?.borderType || 'border-1'"
+        :color="component.props?.color"
+        :background-color="component.props?.backgroundColor"
+      />
+    </template>
+
+    <template v-else-if="component.type === 'datav-decoration'">
+      <DatavDecoration
+        :type="component.props?.decorationType || 'decoration-1'"
+        :color="component.props?.color"
+        :reverse="component.props?.reverse"
+      />
+    </template>
+
+    <template v-else-if="component.type === 'datav-scroll-board'">
+      <DatavScrollBoard :config="component.props" />
+    </template>
+
+    <template v-else-if="component.type === 'datav-digital-flop'">
+      <DatavDigitalFlop :config="component.props" />
+    </template>
+
+    <template v-else-if="component.type === 'datav-water-ball'">
+      <DatavWaterBall :config="component.props" />
+    </template>
+
+    <template v-else-if="component.type === 'datav-loading'">
+      <DatavLoading :config="component.props" />
+    </template>
+
     <!-- 默认 -->
     <template v-else>
       <div class="component-placeholder">
@@ -84,12 +138,24 @@
 
 <script setup>
 import { computed } from 'vue'
-import { COMPONENT_CATEGORIES } from '@/config/components'
-import { componentRegistry } from '@/config/components'
+import { COMPONENT_CATEGORIES, componentRegistry } from '@/config/components'
+import { BORDER_COLOR, TEXT_PRIMARY, TEXT_SECONDARY } from '@/config/colors'
 import ChartComponent from '@/components/charts/ChartComponent.vue'
 import TableComponent from '@/components/tables/TableComponent.vue'
+import RankListComponent from '@/components/tables/RankListComponent.vue'
 import FormComponent from '@/components/forms/FormComponent.vue'
 import NumberFlip from '@/components/base/NumberFlip.vue'
+import KpiCard from '@/components/text/KpiCard.vue'
+import ProgressBar from '@/components/text/ProgressBar.vue'
+import VideoComponent from '@/components/media/VideoComponent.vue'
+import TabContainer from '@/components/container/TabContainer.vue'
+import MarqueeComponent from '@/components/container/MarqueeComponent.vue'
+import DatavBorder from '@/components/datav/DatavBorder.vue'
+import DatavDecoration from '@/components/datav/DatavDecoration.vue'
+import DatavScrollBoard from '@/components/datav/DatavScrollBoard.vue'
+import DatavDigitalFlop from '@/components/datav/DatavDigitalFlop.vue'
+import DatavWaterBall from '@/components/datav/DatavWaterBall.vue'
+import DatavLoading from '@/components/datav/DatavLoading.vue'
 
 const props = defineProps({
   component: {
@@ -100,7 +166,7 @@ const props = defineProps({
 
 // 获取组件分类
 const getComponentCategory = () => {
-  const meta = componentRegistry.find(c => c.type === props.component.type)
+  const meta = componentRegistry.find((c) => c.type === props.component.type)
   return meta?.category || ''
 }
 
@@ -116,7 +182,7 @@ const rendererStyle = computed(() => ({
   background: props.component.style?.background || 'transparent',
   borderStyle: props.component.style?.borderStyle || 'none',
   borderWidth: props.component.style?.borderStyle !== 'none' ? '1px' : '0',
-  borderColor: props.component.style?.borderColor || '#1e3a5f',
+  borderColor: props.component.style?.borderColor || BORDER_COLOR,
   borderRadius: `${props.component.style?.borderRadius || 0}px`,
   opacity: props.component.style?.opacity ?? 1
 }))
@@ -145,16 +211,20 @@ const rendererClasses = computed(() => {
 
 // 标题样式
 const titleStyle = computed(() => ({
-  color: props.component.props?.color || '#ffffff',
+  color: props.component.props?.color || TEXT_PRIMARY,
   textAlign: props.component.props?.align || 'left',
-  fontSize: props.component.props?.level === 1 ? '24px' :
-            props.component.props?.level === 2 ? '20px' : '16px',
+  fontSize:
+    props.component.props?.level === 1
+      ? '24px'
+      : props.component.props?.level === 2
+        ? '20px'
+        : '16px',
   fontWeight: '600'
 }))
 
 // 副标题样式
 const subtitleStyle = computed(() => ({
-  color: props.component.props?.color || '#a0aec0',
+  color: props.component.props?.color || TEXT_SECONDARY,
   textAlign: props.component.props?.align || 'left',
   fontSize: '14px'
 }))
@@ -165,15 +235,18 @@ const borderStyle = computed(() => ({
   height: '100%',
   borderStyle: props.component.props?.style || 'solid',
   borderWidth: `${props.component.props?.width || 1}px`,
-  borderColor: props.component.props?.color || '#1e3a5f',
+  borderColor: props.component.props?.color || BORDER_COLOR,
   borderRadius: `${props.component.props?.radius || 0}px`
 }))
 
 // 分割线样式
 const dividerStyle = computed(() => ({
   width: props.component.props?.direction === 'vertical' ? '1px' : '100%',
-  height: props.component.props?.direction === 'vertical' ? '100%' : `${props.component.props?.width || 1}px`,
-  background: props.component.props?.color || '#1e3a5f'
+  height:
+    props.component.props?.direction === 'vertical'
+      ? '100%'
+      : `${props.component.props?.width || 1}px`,
+  background: props.component.props?.color || BORDER_COLOR
 }))
 </script>
 

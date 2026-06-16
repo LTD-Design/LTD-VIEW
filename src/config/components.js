@@ -88,6 +88,61 @@ export const componentRegistry = [
     },
     defaultSize: { width: 400, height: 400 }
   },
+  {
+    type: 'scatter-chart',
+    name: '散点图',
+    category: COMPONENT_CATEGORIES.CHART,
+    icon: 'chart-scatter',
+    defaultProps: {
+      title: '散点图',
+      theme: 'dark',
+      showLegend: true,
+      showTooltip: true,
+      symbolSize: 12
+    },
+    defaultSize: { width: 600, height: 400 }
+  },
+  {
+    type: 'funnel-chart',
+    name: '漏斗图',
+    category: COMPONENT_CATEGORIES.CHART,
+    icon: 'chart-funnel',
+    defaultProps: {
+      title: '漏斗图',
+      theme: 'dark',
+      showLegend: true,
+      showTooltip: true,
+      sort: 'descending',
+      gap: 2
+    },
+    defaultSize: { width: 500, height: 400 }
+  },
+  {
+    type: 'heatmap-chart',
+    name: '热力图',
+    category: COMPONENT_CATEGORIES.CHART,
+    icon: 'chart-heatmap',
+    defaultProps: {
+      title: '热力图',
+      theme: 'dark',
+      showLegend: true,
+      showTooltip: true
+    },
+    defaultSize: { width: 600, height: 400 }
+  },
+  {
+    type: 'treemap-chart',
+    name: '矩形树图',
+    category: COMPONENT_CATEGORIES.CHART,
+    icon: 'chart-treemap',
+    defaultProps: {
+      title: '矩形树图',
+      theme: 'dark',
+      showTooltip: true,
+      roam: false
+    },
+    defaultSize: { width: 600, height: 400 }
+  },
 
   // 表格类
   {
@@ -236,6 +291,40 @@ export const componentRegistry = [
     },
     defaultSize: { width: 200, height: 80 }
   },
+  {
+    type: 'kpi-card',
+    name: 'KPI 卡片',
+    category: COMPONENT_CATEGORIES.TEXT,
+    icon: 'kpi-card',
+    defaultProps: {
+      value: 0,
+      label: '指标',
+      prefix: '',
+      suffix: '',
+      icon: 'arrow-up',
+      trend: 'up',
+      trendValue: '+12.5%',
+      color: '#18a058'
+    },
+    defaultSize: { width: 240, height: 120 }
+  },
+  {
+    type: 'progress-bar',
+    name: '进度条',
+    category: COMPONENT_CATEGORIES.TEXT,
+    icon: 'progress',
+    defaultProps: {
+      value: 65,
+      max: 100,
+      color: '#2080f0',
+      trackColor: '#1e3a5f',
+      height: 8,
+      showLabel: true,
+      labelPosition: 'right',
+      format: '{value}%'
+    },
+    defaultSize: { width: 400, height: 40 }
+  },
 
   // 媒体类
   {
@@ -249,6 +338,21 @@ export const componentRegistry = [
       alt: ''
     },
     defaultSize: { width: 400, height: 300 }
+  },
+  {
+    type: 'video',
+    name: '视频',
+    category: COMPONENT_CATEGORIES.MEDIA,
+    icon: 'video',
+    defaultProps: {
+      src: '',
+      autoplay: false,
+      loop: false,
+      muted: false,
+      controls: true,
+      poster: ''
+    },
+    defaultSize: { width: 600, height: 400 }
   },
 
   // 装饰类
@@ -290,21 +394,137 @@ export const componentRegistry = [
       hoverable: false
     },
     defaultSize: { width: 400, height: 300 }
+  },
+  {
+    type: 'tab-container',
+    name: 'Tab 容器',
+    category: COMPONENT_CATEGORIES.CONTAINER,
+    icon: 'tab-container',
+    defaultProps: {
+      tabs: [{ label: '标签 1' }, { label: '标签 2' }],
+      background: 'transparent',
+      borderRadius: 0
+    },
+    defaultSize: { width: 500, height: 400 }
+  },
+  {
+    type: 'marquee',
+    name: '跑马灯',
+    category: COMPONENT_CATEGORIES.CONTAINER,
+    icon: 'marquee',
+    defaultProps: {
+      text: '欢迎使用 LtdView 可视化平台',
+      speed: 3,
+      direction: 'left',
+      color: '#ffffff',
+      fontSize: 16,
+      fontWeight: '400',
+      background: 'transparent'
+    },
+    defaultSize: { width: 600, height: 40 }
+  },
+
+  // DataV 边框组件
+  {
+    type: 'datav-border',
+    name: 'DataV 边框',
+    category: COMPONENT_CATEGORIES.DECORATOR,
+    icon: 'datav-border',
+    defaultProps: {
+      borderType: 'border-1',
+      color: '#2080f0',
+      backgroundColor: 'transparent'
+    },
+    defaultSize: { width: 400, height: 300 }
+  },
+
+  // DataV 装饰器组件
+  {
+    type: 'datav-decoration',
+    name: 'DataV 装饰',
+    category: COMPONENT_CATEGORIES.DECORATOR,
+    icon: 'datav-decoration',
+    defaultProps: {
+      decorationType: 'decoration-1',
+      color: ['#2080f0', '#40a9ff'],
+      reverse: false
+    },
+    defaultSize: { width: 400, height: 40 }
+  },
+
+  // DataV 特殊组件
+  {
+    type: 'datav-scroll-board',
+    name: '轮播表格',
+    category: COMPONENT_CATEGORIES.TABLE,
+    icon: 'datav-scroll-board',
+    defaultProps: {
+      header: ['名称', '数值'],
+      data: [
+        ['示例数据 1', '128'],
+        ['示例数据 2', '256'],
+        ['示例数据 3', '512']
+      ],
+      rowNum: 5,
+      waitTime: 2000,
+      autoPlay: true,
+      headerBGC: '#1e3a5f',
+      headerColor: '#4fc3f7'
+    },
+    defaultSize: { width: 500, height: 300 }
+  },
+  {
+    type: 'datav-digital-flop',
+    name: '数字翻牌器',
+    category: COMPONENT_CATEGORIES.TEXT,
+    icon: 'datav-digital-flop',
+    defaultProps: {
+      value: 128,
+      decimals: 0,
+      fontSize: 32,
+      colors: ['#2080f0', '#40a9ff'],
+      textAlign: 'center'
+    },
+    defaultSize: { width: 300, height: 80 }
+  },
+  {
+    type: 'datav-water-ball',
+    name: '水球图',
+    category: COMPONENT_CATEGORIES.CHART,
+    icon: 'datav-water-ball',
+    defaultProps: {
+      percent: 50,
+      colors: [
+        { color: '#2080f0', rgb: '32, 128, 240' },
+        { color: '#40a9ff', rgb: '64, 169, 255' }
+      ]
+    },
+    defaultSize: { width: 200, height: 200 }
+  },
+  {
+    type: 'datav-loading',
+    name: '加载动画',
+    category: COMPONENT_CATEGORIES.DECORATOR,
+    icon: 'datav-loading',
+    defaultProps: {
+      size: 60
+    },
+    defaultSize: { width: 120, height: 120 }
   }
 ]
 
 // 根据类型获取组件配置
 export function getComponentByType(type) {
-  return componentRegistry.find(item => item.type === type)
+  return componentRegistry.find((item) => item.type === type)
 }
 
 // 根据分类获取组件列表
 export function getComponentsByCategory(category) {
-  return componentRegistry.filter(item => item.category === category)
+  return componentRegistry.filter((item) => item.category === category)
 }
 
 // 获取所有分类
 export function getAllCategories() {
-  const categories = new Set(componentRegistry.map(item => item.category))
+  const categories = new Set(componentRegistry.map((item) => item.category))
   return Array.from(categories)
 }

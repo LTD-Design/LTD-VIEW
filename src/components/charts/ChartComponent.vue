@@ -7,20 +7,20 @@
       @drill-to="handleDrillTo"
     />
 
-    <div class="chart-title" v-if="config.props?.title && breadcrumb.length === 0">
+    <div v-if="config.props?.title && breadcrumb.length === 0" class="chart-title">
       {{ config.props.title }}
     </div>
-    <div class="chart-title" v-else-if="breadcrumb.length > 0">
+    <div v-else-if="breadcrumb.length > 0" class="chart-title">
       {{ breadcrumb[breadcrumb.length - 1].name }}
     </div>
 
-    <div class="chart-content" ref="chartRef"></div>
+    <div ref="chartRef" class="chart-content"></div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import * as echarts from 'echarts'
+import echarts from '@/utils/echarts'
 import { getChartColors, getThemeConfig } from '@/config/themes'
 import { useDataStore } from '@/stores/data'
 import { useCanvasStore } from '@/stores/canvas'
@@ -82,9 +82,11 @@ const getChartOption = () => {
   const showTooltip = props.config.props?.showTooltip ?? true
 
   const tooltip = showTooltip ? { trigger: 'axis' } : undefined
-  const legend = showLegend ? {
-    textStyle: { color: themeConfig.textSecondary }
-  } : undefined
+  const legend = showLegend
+    ? {
+        textStyle: { color: themeConfig.textSecondary }
+      }
+    : undefined
 
   const axisCommon = {
     axisLine: { lineStyle: { color: themeConfig.border } },
@@ -99,7 +101,7 @@ const getChartOption = () => {
         legend,
         xAxis: {
           type: 'category',
-          data: data.map(d => d.name),
+          data: data.map((d) => d.name),
           ...axisCommon
         },
         yAxis: {
@@ -107,12 +109,14 @@ const getChartOption = () => {
           ...axisCommon,
           splitLine: { lineStyle: { color: themeConfig.border } }
         },
-        series: [{
-          type: 'bar',
-          data: data.map(d => d.value),
-          barWidth: '60%',
-          itemStyle: { borderRadius: [4, 4, 0, 0] }
-        }],
+        series: [
+          {
+            type: 'bar',
+            data: data.map((d) => d.value),
+            barWidth: '60%',
+            itemStyle: { borderRadius: [4, 4, 0, 0] }
+          }
+        ],
         grid: { left: 50, right: 20, top: showLegend ? 40 : 20, bottom: 30 }
       }
 
@@ -123,7 +127,7 @@ const getChartOption = () => {
         legend,
         xAxis: {
           type: 'category',
-          data: data.map(d => d.name),
+          data: data.map((d) => d.name),
           ...axisCommon
         },
         yAxis: {
@@ -131,12 +135,14 @@ const getChartOption = () => {
           ...axisCommon,
           splitLine: { lineStyle: { color: themeConfig.border } }
         },
-        series: [{
-          type: 'line',
-          data: data.map(d => d.value),
-          smooth: props.config.props?.smooth ?? true,
-          areaStyle: { opacity: 0.3 }
-        }],
+        series: [
+          {
+            type: 'line',
+            data: data.map((d) => d.value),
+            smooth: props.config.props?.smooth ?? true,
+            areaStyle: { opacity: 0.3 }
+          }
+        ],
         grid: { left: 50, right: 20, top: showLegend ? 40 : 20, bottom: 30 }
       }
 
@@ -144,55 +150,195 @@ const getChartOption = () => {
       return {
         color: colors,
         tooltip: showTooltip ? { trigger: 'item' } : undefined,
-        legend: showLegend ? {
-          orient: 'vertical',
-          right: 10,
-          top: 'center',
-          textStyle: { color: themeConfig.textSecondary }
-        } : undefined,
-        series: [{
-          type: 'pie',
-          radius: ['40%', '70%'],
-          data: data.map(d => ({ name: d.name, value: d.value })),
-          label: { color: themeConfig.textSecondary }
-        }]
+        legend: showLegend
+          ? {
+              orient: 'vertical',
+              right: 10,
+              top: 'center',
+              textStyle: { color: themeConfig.textSecondary }
+            }
+          : undefined,
+        series: [
+          {
+            type: 'pie',
+            radius: ['40%', '70%'],
+            data: data.map((d) => ({ name: d.name, value: d.value })),
+            label: { color: themeConfig.textSecondary }
+          }
+        ]
       }
 
     case 'gauge-chart':
       return {
-        series: [{
-          type: 'gauge',
-          min: props.config.props?.min || 0,
-          max: props.config.props?.max || 100,
-          data: [{ value: data[0]?.value || 50 }],
-          axisLine: {
-            lineStyle: {
-              width: 10,
-              color: [[0.3, '#18a058'], [0.7, '#f0a020'], [1, '#d03050']]
-            }
-          },
-          pointer: { width: 4 },
-          detail: { color: themeConfig.text }
-        }]
+        series: [
+          {
+            type: 'gauge',
+            min: props.config.props?.min || 0,
+            max: props.config.props?.max || 100,
+            data: [{ value: data[0]?.value || 50 }],
+            axisLine: {
+              lineStyle: {
+                width: 10,
+                color: [
+                  [0.3, '#18a058'],
+                  [0.7, '#f0a020'],
+                  [1, '#d03050']
+                ]
+              }
+            },
+            pointer: { width: 4 },
+            detail: { color: themeConfig.text }
+          }
+        ]
       }
 
     case 'radar-chart':
       return {
         color: colors,
         tooltip: showTooltip ? {} : undefined,
-        legend: showLegend ? {
-          textStyle: { color: themeConfig.textSecondary }
-        } : undefined,
+        legend: showLegend
+          ? {
+              textStyle: { color: themeConfig.textSecondary }
+            }
+          : undefined,
         radar: {
-          indicator: data.map(d => ({ name: d.name, max: 100 })),
+          indicator: data.map((d) => ({ name: d.name, max: 100 })),
           axisLine: { lineStyle: { color: themeConfig.border } },
           splitLine: { lineStyle: { color: themeConfig.border } },
           axisName: { color: themeConfig.textSecondary }
         },
-        series: [{
-          type: 'radar',
-          data: [{ value: data.map(d => d.value), name: '数据' }]
-        }]
+        series: [
+          {
+            type: 'radar',
+            data: [{ value: data.map((d) => d.value), name: '数据' }]
+          }
+        ]
+      }
+
+    case 'scatter-chart':
+      return {
+        color: colors,
+        tooltip: showTooltip ? { trigger: 'item' } : undefined,
+        legend: showLegend
+          ? {
+              textStyle: { color: themeConfig.textSecondary }
+            }
+          : undefined,
+        xAxis: {
+          type: 'value',
+          ...axisCommon,
+          splitLine: { lineStyle: { color: themeConfig.border } }
+        },
+        yAxis: {
+          type: 'value',
+          ...axisCommon,
+          splitLine: { lineStyle: { color: themeConfig.border } }
+        },
+        series: [
+          {
+            type: 'scatter',
+            data: data.map((d) => [d.name, d.value]),
+            symbolSize: props.config.props?.symbolSize || 12
+          }
+        ],
+        grid: { left: 50, right: 20, top: showLegend ? 40 : 20, bottom: 30 }
+      }
+
+    case 'funnel-chart':
+      return {
+        color: colors,
+        tooltip: showTooltip ? { trigger: 'item', formatter: '{b}: {c}' } : undefined,
+        legend: showLegend
+          ? {
+              orient: 'vertical',
+              right: 10,
+              top: 'center',
+              textStyle: { color: themeConfig.textSecondary }
+            }
+          : undefined,
+        series: [
+          {
+            type: 'funnel',
+            left: 20,
+            top: showLegend ? 40 : 20,
+            bottom: 20,
+            width: showLegend ? '60%' : '80%',
+            sort: props.config.props?.sort || 'descending',
+            gap: props.config.props?.gap ?? 2,
+            label: { color: themeConfig.textSecondary },
+            data: data.map((d) => ({ name: d.name, value: d.value }))
+          }
+        ]
+      }
+
+    case 'heatmap-chart':
+      return {
+        color: colors,
+        tooltip: showTooltip ? { trigger: 'item' } : undefined,
+        visualMap: {
+          min: Math.min(...data.map((d) => d.value)),
+          max: Math.max(...data.map((d) => d.value)),
+          calculable: true,
+          inRange: {
+            color: ['#2080f0', '#18a058', '#f0a020', '#d03050']
+          },
+          textStyle: { color: themeConfig.textSecondary }
+        },
+        xAxis: {
+          type: 'category',
+          data: [...new Set(data.map((d) => d.x || d.name))],
+          ...axisCommon
+        },
+        yAxis: {
+          type: 'category',
+          data: [...new Set(data.map((d) => d.y || ''))],
+          ...axisCommon
+        },
+        series: [
+          {
+            type: 'heatmap',
+            data: data.map((d) => [d.x || d.name, d.y || '', d.value]),
+            label: { show: false }
+          }
+        ],
+        grid: { left: 60, right: 40, top: showLegend ? 40 : 20, bottom: 30 }
+      }
+
+    case 'treemap-chart':
+      return {
+        color: colors,
+        tooltip: showTooltip ? { trigger: 'item' } : undefined,
+        series: [
+          {
+            type: 'treemap',
+            roam: props.config.props?.roam ?? false,
+            nodeClick: 'zoomToNode',
+            breadcrumb: { show: true },
+            label: {
+              show: true,
+              color: themeConfig.text,
+              fontSize: 12
+            },
+            levels: [
+              {
+                itemStyle: {
+                  borderColor: themeConfig.border,
+                  borderWidth: 2,
+                  gapWidth: 2
+                }
+              },
+              {
+                colorSaturation: [0.3, 0.7],
+                itemStyle: {
+                  borderColorSaturation: 0.7,
+                  gapWidth: 1,
+                  borderWidth: 1
+                }
+              }
+            ],
+            data: data.map((d) => ({ name: d.name, value: d.value }))
+          }
+        ]
       }
 
     default:
@@ -273,8 +419,8 @@ const handleLinkage = () => {
   const linkageTargets = props.config.interaction?.click?.targets
   if (!linkageTargets?.length) return
 
-  linkageTargets.forEach(targetId => {
-    const target = canvasStore.components.find(c => c.id === targetId)
+  linkageTargets.forEach((targetId) => {
+    const target = canvasStore.components.find((c) => c.id === targetId)
     if (target) {
       // 触发目标组件刷新数据
       dataStore.initComponentData(target)
@@ -296,11 +442,10 @@ const handleResize = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   initChart()
   window.addEventListener('resize', handleResize)
 
-  // 监听容器尺寸变化（拖拽调整大小时触发）
   if (chartRef.value) {
     resizeObserver = new ResizeObserver(() => {
       if (chartInstance) {
@@ -308,6 +453,10 @@ onMounted(() => {
       }
     })
     resizeObserver.observe(chartRef.value)
+  }
+
+  if (props.config.data?.type === 'api') {
+    await dataStore.initComponentData(props.config)
   }
 })
 
@@ -323,19 +472,11 @@ onUnmounted(() => {
   }
 })
 
-// 监听数据和属性变化
 watch(
   () => [props.config.data, props.config.props, dataStore.getComponentData(props.config.id)],
   () => updateChart(),
   { deep: true }
 )
-
-// 初始化数据
-onMounted(async () => {
-  if (props.config.data?.type === 'api') {
-    await dataStore.initComponentData(props.config)
-  }
-})
 </script>
 
 <style scoped lang="scss">

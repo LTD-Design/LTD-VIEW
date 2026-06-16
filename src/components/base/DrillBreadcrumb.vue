@@ -1,11 +1,6 @@
 <template>
-  <div class="drill-breadcrumb" v-if="breadcrumb.length > 0">
-    <span
-      class="breadcrumb-item breadcrumb-root"
-      @click="$emit('drill-to', 0)"
-    >
-      全部数据
-    </span>
+  <div v-if="breadcrumb.length > 0" class="drill-breadcrumb">
+    <span class="breadcrumb-item breadcrumb-root" @click="$emit('drill-to', 0)"> 全部数据 </span>
     <template v-for="(item, index) in breadcrumb" :key="index">
       <span class="breadcrumb-separator">/</span>
       <span
@@ -32,6 +27,7 @@ defineEmits(['drill-to'])
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
 
 .drill-breadcrumb {
   display: flex;
@@ -44,10 +40,7 @@ defineEmits(['drill-to'])
   flex-shrink: 0;
   overflow-x: auto;
   white-space: nowrap;
-
-  &::-webkit-scrollbar {
-    height: 0;
-  }
+  @include scrollbar;
 }
 
 .breadcrumb-item {
