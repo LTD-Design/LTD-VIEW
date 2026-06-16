@@ -1,46 +1,29 @@
 <template>
   <div class="interaction-properties">
     <!-- 点击事件 -->
-    <div class="property-section">
-      <div class="property-section-title">点击事件</div>
+    <PropertySection title="点击事件">
       <div class="property-row">
         <span class="property-label">类型</span>
-        <n-select
-          v-model:value="clickAction.type"
-          size="small"
-          :options="actionOptions"
-        />
+        <n-select v-model:value="clickAction.type" size="small" :options="actionOptions" />
       </div>
 
       <!-- 跳转链接 -->
       <template v-if="clickAction.type === 'link'">
         <div class="property-row">
           <span class="property-label">链接</span>
-          <n-input
-            v-model:value="clickAction.url"
-            size="small"
-            placeholder="https://example.com"
-          />
+          <n-input v-model:value="clickAction.url" size="small" placeholder="https://example.com" />
         </div>
         <div class="property-row">
           <span class="property-label">打开方式</span>
-          <n-select
-            v-model:value="clickAction.target"
-            size="small"
-            :options="targetOptions"
-          />
+          <n-select v-model:value="clickAction.target" size="small" :options="targetOptions" />
         </div>
       </template>
 
       <!-- 下钻配置 -->
       <template v-if="clickAction.type === 'drillDown'">
         <div class="drill-levels-section">
-          <div class="property-section-title">下钻层级</div>
-          <div
-            v-for="(level, index) in drillLevels"
-            :key="index"
-            class="drill-level-item"
-          >
+          <div class="drill-level-title">下钻层级</div>
+          <div v-for="(level, index) in drillLevels" :key="index" class="drill-level-item">
             <div class="drill-level-header">
               <span class="drill-level-num">L{{ index + 1 }}</span>
               <n-input
@@ -49,21 +32,12 @@
                 placeholder="层级名称"
                 class="drill-level-name"
               />
-              <n-button
-                size="tiny"
-                quaternary
-                type="error"
-                @click="removeDrillLevel(index)"
-              >
+              <n-button size="tiny" quaternary type="error" @click="removeDrillLevel(index)">
                 x
               </n-button>
             </div>
             <div class="drill-level-fields">
-              <n-input
-                v-model:value="level.field"
-                size="tiny"
-                placeholder="字段名"
-              />
+              <n-input v-model:value="level.field" size="tiny" placeholder="字段名" />
               <n-input
                 v-model:value="level.apiEndpoint"
                 size="tiny"
@@ -71,23 +45,15 @@
               />
             </div>
           </div>
-          <n-button size="tiny" dashed block @click="addDrillLevel">
-            + 添加层级
-          </n-button>
+          <n-button size="tiny" dashed block @click="addDrillLevel"> + 添加层级 </n-button>
         </div>
 
         <div class="property-row">
           <span class="property-label">行为</span>
-          <n-select
-            v-model:value="clickAction.behavior"
-            size="small"
-            :options="behaviorOptions"
-          />
+          <n-select v-model:value="clickAction.behavior" size="small" :options="behaviorOptions" />
         </div>
         <div class="property-row">
-          <n-checkbox v-model:checked="clickAction.showBreadcrumb">
-            显示面包屑
-          </n-checkbox>
+          <n-checkbox v-model:checked="clickAction.showBreadcrumb"> 显示面包屑 </n-checkbox>
         </div>
       </template>
 
@@ -104,40 +70,27 @@
           />
         </div>
       </template>
-    </div>
+    </PropertySection>
 
     <!-- 悬停效果 -->
-    <div class="property-section">
-      <div class="property-section-title">悬停效果</div>
+    <PropertySection title="悬停效果">
       <div class="property-row">
-        <n-checkbox v-model:checked="hoverEffect.enabled">
-          启用悬停效果
-        </n-checkbox>
+        <n-checkbox v-model:checked="hoverEffect.enabled"> 启用悬停效果 </n-checkbox>
       </div>
       <template v-if="hoverEffect.enabled">
         <div class="property-row">
           <span class="property-label">缩放</span>
-          <n-slider
-            v-model:value="hoverEffect.scale"
-            :min="80"
-            :max="120"
-            :step="1"
-          />
+          <n-slider v-model:value="hoverEffect.scale" :min="80" :max="120" :step="1" />
         </div>
         <div class="property-row">
           <span class="property-label">阴影</span>
-          <n-select
-            v-model:value="hoverEffect.shadow"
-            size="small"
-            :options="shadowOptions"
-          />
+          <n-select v-model:value="hoverEffect.shadow" size="small" :options="shadowOptions" />
         </div>
       </template>
-    </div>
+    </PropertySection>
 
     <!-- 动画 -->
-    <div class="property-section">
-      <div class="property-section-title">动画</div>
+    <PropertySection title="动画">
       <div class="property-row">
         <span class="property-label">入场</span>
         <n-select
@@ -147,7 +100,7 @@
           clearable
         />
       </div>
-      <div class="property-row" v-if="animation.entrance">
+      <div v-if="animation.entrance" class="property-row">
         <span class="property-label">时长</span>
         <n-input-number
           v-model:value="animation.duration"
@@ -157,13 +110,14 @@
           placeholder="毫秒"
         />
       </div>
-    </div>
+    </PropertySection>
   </div>
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { useCanvasStore } from '@/stores/canvas'
+import PropertySection from './PropertySection.vue'
 
 const props = defineProps({
   component: {
@@ -185,7 +139,7 @@ const clickAction = reactive({
 
 const drillLevels = reactive(
   props.component.interaction?.click?.levels?.length > 0
-    ? props.component.interaction.click.levels.map(l => ({ ...l }))
+    ? props.component.interaction.click.levels.map((l) => ({ ...l }))
     : [{ name: '第一级', field: '', apiEndpoint: '' }]
 )
 
@@ -252,12 +206,14 @@ const behaviorOptions = [
   { label: '弹窗展示', value: 'modal' }
 ]
 
-const componentOptions = canvasStore.components
-  .filter(c => c.id !== props.component.id)
-  .map(c => ({
-    label: `${c.type} (${c.id.slice(0, 8)})`,
-    value: c.id
-  }))
+const componentOptions = computed(() =>
+  canvasStore.components
+    .filter((c) => c.id !== props.component.id)
+    .map((c) => ({
+      label: `${c.type} (${c.id.slice(0, 8)})`,
+      value: c.id
+    }))
+)
 
 const shadowOptions = [
   { label: '无', value: 'none' },
@@ -281,6 +237,13 @@ const animationOptions = [
 @use '@/styles/variables' as *;
 
 .drill-levels-section {
+  margin-bottom: $spacing-sm;
+}
+
+.drill-level-title {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $text-secondary;
   margin-bottom: $spacing-sm;
 }
 

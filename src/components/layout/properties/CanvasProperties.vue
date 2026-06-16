@@ -1,8 +1,7 @@
 <template>
   <div class="canvas-properties">
     <!-- 基本信息 -->
-    <div class="property-section">
-      <div class="property-section-title">基本信息</div>
+    <PropertySection title="基本信息">
       <div class="property-row">
         <span class="property-label">名称</span>
         <n-input
@@ -11,11 +10,10 @@
           placeholder="仪表盘名称"
         />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 画布尺寸 -->
-    <div class="property-section">
-      <div class="property-section-title">画布尺寸</div>
+    <PropertySection title="画布尺寸">
       <div class="property-row">
         <span class="property-label">宽度</span>
         <n-input-number
@@ -52,14 +50,13 @@
       </div>
 
       <!-- 适配当前屏幕 -->
-      <n-button size="tiny" block @click="fitToScreen" style="margin-top: 8px;">
+      <n-button size="tiny" block style="margin-top: 8px" @click="fitToScreen">
         适配当前屏幕 ({{ screenWidth }}x{{ screenHeight }})
       </n-button>
-    </div>
+    </PropertySection>
 
     <!-- 外观 -->
-    <div class="property-section">
-      <div class="property-section-title">外观</div>
+    <PropertySection title="外观">
       <div class="property-row">
         <span class="property-label">背景色</span>
         <n-color-picker
@@ -76,36 +73,30 @@
           :options="themeOptions"
         />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 统计信息 -->
-    <div class="property-section">
-      <div class="property-section-title">统计</div>
+    <PropertySection title="统计">
       <div class="stat-row">
         <span class="stat-label">组件数量</span>
         <span class="stat-value">{{ canvasStore.componentCount }}</span>
       </div>
       <div class="stat-row">
         <span class="stat-label">历史记录</span>
-        <span class="stat-value">{{ canvasStore.historyIndex + 1 }} / {{ canvasStore.history.length }}</span>
+        <span class="stat-value"
+          >{{ canvasStore.historyIndex + 1 }} / {{ canvasStore.history.length }}</span
+        >
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 导入导出 -->
-    <div class="property-section">
-      <div class="property-section-title">导入导出</div>
+    <PropertySection title="导入导出">
       <n-space vertical>
-        <n-button size="small" block @click="handleImport">
-          导入 JSON 配置
-        </n-button>
-        <n-button size="small" block @click="handleExportJson">
-          导出 JSON 配置
-        </n-button>
-        <n-button size="small" block @click="handleExportHtml">
-          导出独立 HTML
-        </n-button>
+        <n-button size="small" block @click="importJson"> 导入 JSON 配置 </n-button>
+        <n-button size="small" block @click="exportJson"> 导出 JSON 配置 </n-button>
+        <n-button size="small" block @click="exportHtmlFile"> 导出独立 HTML </n-button>
       </n-space>
-    </div>
+    </PropertySection>
   </div>
 </template>
 
@@ -113,11 +104,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useMessage } from 'naive-ui'
 import { useCanvasStore } from '@/stores/canvas'
-import { exportToHtml, downloadHtml } from '@/utils/exportHtml'
-import { themes, chartColors } from '@/config/themes'
+import { useExportDashboard } from '@/composables/useExportDashboard'
+import PropertySection from './PropertySection.vue'
 
 const message = useMessage()
 const canvasStore = useCanvasStore()
+const { exportJson, exportHtmlFile, importJson } = useExportDashboard(canvasStore)
 
 const screenWidth = ref(window.innerWidth)
 const screenHeight = ref(window.innerHeight)
@@ -139,18 +131,18 @@ const themeOptions = [
 ]
 
 const isActivePreset = (preset) => {
-  return canvasStore.canvasConfig.width === preset.width &&
-         canvasStore.canvasConfig.height === preset.height
+  return (
+    canvasStore.canvasConfig.width === preset.width &&
+    canvasStore.canvasConfig.height === preset.height
+  )
 }
 
 const setPresetSize = (preset) => {
-  canvasStore.canvasConfig.width = preset.width
-  canvasStore.canvasConfig.height = preset.height
+  canvasStore.updateCanvasSize(preset.width, preset.height)
 }
 
 const fitToScreen = () => {
-  canvasStore.canvasConfig.width = screenWidth.value
-  canvasStore.canvasConfig.height = screenHeight.value
+  canvasStore.updateCanvasSize(screenWidth.value, screenHeight.value)
   message.info(`画布已设为 ${screenWidth.value}x${screenHeight.value}`)
 }
 
@@ -166,46 +158,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
-
-const handleImport = () => {
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = '.json'
-  input.onchange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    try {
-      const text = await file.text()
-      const config = JSON.parse(text)
-      canvasStore.importConfig(config)
-      message.success('配置已导入')
-    } catch (err) {
-      message.error('配置文件格式错误')
-    }
-  }
-  input.click()
-}
-
-const handleExportJson = () => {
-  const config = canvasStore.exportConfig()
-  const json = JSON.stringify(config, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${config.name || 'dashboard'}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-  message.success('JSON 配置已导出')
-}
-
-const handleExportHtml = () => {
-  const config = canvasStore.exportConfig()
-  const html = exportToHtml(config, canvasStore.components, { themes, chartColors })
-  downloadHtml(html, `${config.name || 'dashboard'}.html`)
-  message.success('HTML 文件已导出')
-}
 </script>
 
 <style scoped lang="scss">

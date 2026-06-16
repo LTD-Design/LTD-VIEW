@@ -1,22 +1,16 @@
 <template>
   <div class="data-properties">
     <!-- 数据源类型 -->
-    <div class="property-section">
-      <div class="property-section-title">数据源</div>
+    <PropertySection title="数据源">
       <div class="property-row">
         <span class="property-label">类型</span>
-        <n-select
-          v-model:value="dataSourceType"
-          size="small"
-          :options="dataSourceOptions"
-        />
+        <n-select v-model:value="dataSourceType" size="small" :options="dataSourceOptions" />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 静态数据 -->
     <template v-if="dataSourceType === 'static'">
-      <div class="property-section">
-        <div class="property-section-title">静态数据</div>
+      <PropertySection title="静态数据">
         <n-input
           v-model:value="staticData"
           type="textarea"
@@ -24,37 +18,30 @@
           placeholder='JSON 格式，例如：[{"name":"A","value":100}]'
         />
         <div class="data-actions">
-          <n-button size="tiny" @click="handleFormatJson">
-            格式化
-          </n-button>
-          <n-button size="tiny" @click="handleLoadSample">
-            加载示例
-          </n-button>
+          <n-button size="tiny" @click="handleFormatJson"> 格式化 </n-button>
+          <n-button size="tiny" @click="handleLoadSample"> 加载示例 </n-button>
           <span v-if="parseError" class="parse-error">{{ parseError }}</span>
           <span v-else class="data-count">{{ dataCount }} 条数据</span>
         </div>
-      </div>
+      </PropertySection>
     </template>
 
     <!-- API 数据 -->
     <template v-if="dataSourceType === 'api'">
-      <div class="property-section">
-        <div class="property-section-title">API 配置</div>
+      <PropertySection title="API 配置">
         <div class="property-row">
           <span class="property-label">URL</span>
           <n-input
             v-model:value="apiUrl"
             size="small"
             placeholder="https://api.example.com/data"
+            :status="urlError ? 'error' : undefined"
           />
         </div>
+        <div v-if="urlError" class="url-error">{{ urlError }}</div>
         <div class="property-row">
           <span class="property-label">方法</span>
-          <n-select
-            v-model:value="apiMethod"
-            size="small"
-            :options="methodOptions"
-          />
+          <n-select v-model:value="apiMethod" size="small" :options="methodOptions" />
         </div>
         <div class="property-row">
           <span class="property-label">响应路径</span>
@@ -82,33 +69,30 @@
             placeholder="毫秒（0=不刷新）"
           />
         </div>
-        <n-button size="small" block @click="handleTestApi" :loading="testing">
+        <n-button
+          size="small"
+          block
+          :loading="testing"
+          :disabled="!!urlError"
+          @click="handleTestApi"
+        >
           测试接口
         </n-button>
         <div v-if="testResult" :class="['test-result', testResult.success ? 'success' : 'error']">
           {{ testResult.message }}
         </div>
-      </div>
+      </PropertySection>
     </template>
 
     <!-- 数据映射 -->
-    <div class="property-section">
-      <div class="property-section-title">数据映射</div>
+    <PropertySection title="数据映射">
       <div class="property-row">
         <span class="property-label">名称字段</span>
-        <n-input
-          v-model:value="mapping.xField"
-          size="small"
-          placeholder="如 name、region"
-        />
+        <n-input v-model:value="mapping.xField" size="small" placeholder="如 name、region" />
       </div>
       <div class="property-row">
         <span class="property-label">数值字段</span>
-        <n-input
-          v-model:value="mapping.yField"
-          size="small"
-          placeholder="如 value、sales"
-        />
+        <n-input v-model:value="mapping.yField" size="small" placeholder="如 value、sales" />
       </div>
       <div class="property-row">
         <span class="property-label">系列字段</span>
@@ -118,7 +102,7 @@
           placeholder="如 category（可选）"
         />
       </div>
-    </div>
+    </PropertySection>
   </div>
 </template>
 
@@ -128,6 +112,7 @@ import { useMessage } from 'naive-ui'
 import { useCanvasStore } from '@/stores/canvas'
 import { useDataStore } from '@/stores/data'
 import { getStaticData, mapData } from '@/utils/dataAdapter'
+import PropertySection from './PropertySection.vue'
 
 const props = defineProps({
   component: {
@@ -170,6 +155,19 @@ const dataCount = computed(() => {
     return Array.isArray(arr) ? arr.length : 0
   } catch {
     return 0
+  }
+})
+
+const urlError = computed(() => {
+  if (!apiUrl.value) return ''
+  try {
+    const url = new URL(apiUrl.value)
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return '仅支持 http/https 协议'
+    }
+    return ''
+  } catch {
+    return 'URL 格式无效'
   }
 })
 
@@ -240,7 +238,9 @@ const handleApiChange = () => {
   if (headersStr.value) {
     try {
       headers = JSON.parse(headersStr.value)
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   updateData({
@@ -317,6 +317,12 @@ watch(mapping, handleMappingChange, { deep: true })
 .parse-error {
   font-size: $font-size-xs;
   color: $color-error;
+}
+
+.url-error {
+  font-size: $font-size-xs;
+  color: $color-error;
+  margin-top: $spacing-xs;
 }
 
 .data-count {

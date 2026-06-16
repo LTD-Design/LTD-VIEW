@@ -24,9 +24,7 @@
             <template v-if="canvasStore.selectedComponent">
               <DataProperties :component="canvasStore.selectedComponent" />
             </template>
-            <div v-else class="empty-hint">
-              请先选择一个组件
-            </div>
+            <div v-else class="empty-hint">请先选择一个组件</div>
           </div>
         </n-tab-pane>
 
@@ -35,9 +33,13 @@
             <template v-if="canvasStore.selectedComponent">
               <InteractionProperties :component="canvasStore.selectedComponent" />
             </template>
-            <div v-else class="empty-hint">
-              请先选择一个组件
-            </div>
+            <div v-else class="empty-hint">请先选择一个组件</div>
+          </div>
+        </n-tab-pane>
+
+        <n-tab-pane v-if="canvasStore.selectedComponent" name="component" tab="组件">
+          <div class="property-panel-body">
+            <ComponentProperties :component="canvasStore.selectedComponent" />
           </div>
         </n-tab-pane>
       </n-tabs>
@@ -51,6 +53,7 @@ import StyleProperties from './properties/StyleProperties.vue'
 import DataProperties from './properties/DataProperties.vue'
 import InteractionProperties from './properties/InteractionProperties.vue'
 import CanvasProperties from './properties/CanvasProperties.vue'
+import ComponentProperties from './properties/ComponentProperties.vue'
 
 const canvasStore = useCanvasStore()
 </script>

@@ -1,133 +1,114 @@
 <template>
   <div class="style-properties">
     <!-- 位置 -->
-    <div class="property-section">
-      <div class="property-section-title">位置</div>
+    <PropertySection title="位置">
       <div class="property-row">
         <span class="property-label">X</span>
         <n-input-number
           :value="component.x"
-          @update:value="(val) => updatePosition('x', val)"
           size="small"
           :min="0"
           :step="10"
+          @update:value="(val) => updatePosition('x', val)"
         />
       </div>
       <div class="property-row">
         <span class="property-label">Y</span>
         <n-input-number
           :value="component.y"
-          @update:value="(val) => updatePosition('y', val)"
           size="small"
           :min="0"
           :step="10"
+          @update:value="(val) => updatePosition('y', val)"
         />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 尺寸 -->
-    <div class="property-section">
-      <div class="property-section-title">尺寸</div>
+    <PropertySection title="尺寸">
       <div class="property-row">
         <span class="property-label">宽度</span>
         <n-input-number
           :value="component.width"
-          @update:value="(val) => updateSize('width', val)"
           size="small"
           :min="50"
           :step="10"
+          @update:value="(val) => updateSize('width', val)"
         />
       </div>
       <div class="property-row">
         <span class="property-label">高度</span>
         <n-input-number
           :value="component.height"
-          @update:value="(val) => updateSize('height', val)"
           size="small"
           :min="50"
           :step="10"
+          @update:value="(val) => updateSize('height', val)"
         />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 外观 -->
-    <div class="property-section">
-      <div class="property-section-title">外观</div>
+    <PropertySection title="外观">
       <div class="property-row">
         <span class="property-label">背景色</span>
         <n-color-picker
           :value="component.style?.background || 'transparent'"
-          @update:value="(val) => updateStyle('background', val)"
           size="small"
           :show-alpha="true"
+          @update:value="(val) => updateStyle('background', val)"
         />
       </div>
       <div class="property-row">
         <span class="property-label">边框</span>
         <n-select
           :value="component.style?.borderStyle || 'none'"
-          @update:value="(val) => updateStyle('borderStyle', val)"
           size="small"
           :options="borderOptions"
+          @update:value="(val) => updateStyle('borderStyle', val)"
         />
       </div>
       <div class="property-row">
         <span class="property-label">圆角</span>
         <n-input-number
           :value="component.style?.borderRadius || 0"
-          @update:value="(val) => updateStyle('borderRadius', val)"
           size="small"
           :min="0"
+          @update:value="(val) => updateStyle('borderRadius', val)"
         />
       </div>
       <div class="property-row">
         <span class="property-label">透明度</span>
         <n-slider
           :value="(component.style?.opacity || 1) * 100"
-          @update:value="(val) => updateStyle('opacity', val / 100)"
           :min="0"
           :max="100"
+          @update:value="(val) => updateStyle('opacity', val / 100)"
         />
       </div>
-    </div>
+    </PropertySection>
 
     <!-- 层级 -->
-    <div class="property-section">
-      <div class="property-section-title">层级</div>
+    <PropertySection title="层级">
       <n-space>
-        <n-button size="tiny" @click="canvasStore.bringToFront(component.id)">
-          置顶
-        </n-button>
-        <n-button size="tiny" @click="canvasStore.bringForward(component.id)">
-          上移
-        </n-button>
-        <n-button size="tiny" @click="canvasStore.sendBackward(component.id)">
-          下移
-        </n-button>
-        <n-button size="tiny" @click="canvasStore.sendToBack(component.id)">
-          置底
-        </n-button>
+        <n-button size="tiny" @click="canvasStore.bringToFront(component.id)"> 置顶 </n-button>
+        <n-button size="tiny" @click="canvasStore.bringForward(component.id)"> 上移 </n-button>
+        <n-button size="tiny" @click="canvasStore.sendBackward(component.id)"> 下移 </n-button>
+        <n-button size="tiny" @click="canvasStore.sendToBack(component.id)"> 置底 </n-button>
       </n-space>
-    </div>
+    </PropertySection>
 
     <!-- 操作 -->
-    <div class="property-section">
-      <div class="property-section-title">操作</div>
-      <n-button
-        type="error"
-        size="small"
-        block
-        @click="handleDelete"
-      >
-        删除组件
-      </n-button>
-    </div>
+    <PropertySection title="操作">
+      <n-button type="error" size="small" block @click="handleDelete"> 删除组件 </n-button>
+    </PropertySection>
   </div>
 </template>
 
 <script setup>
 import { useMessage } from 'naive-ui'
 import { useCanvasStore } from '@/stores/canvas'
+import PropertySection from './PropertySection.vue'
 
 const props = defineProps({
   component: {
